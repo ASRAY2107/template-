@@ -1,0 +1,143 @@
+package com.intelli.automation.base;
+
+import java.time.Duration;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+
+public abstract class DriverSetup {
+	
+	protected WebDriver driver;
+	
+	
+	
+	@BeforeMethod
+	public void driverSetup() {
+		driver = new ChromeDriver();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+	}
+	
+	
+	
+	@AfterMethod
+	public void driverClose() {
+		if(driver!= null) {
+			driver.quit();
+		}
+	}
+	
+
+}
+
+package com.intelli.automation.base;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.PageFactory;
+
+
+public abstract class PageCore {
+	protected WebDriver driver;
+	
+	
+	public PageCore(WebDriver driver) {
+		this.driver = driver;
+	}
+	
+	protected void loadingElemets() {
+		PageFactory.initElements(driver, this);
+	}
+	
+	
+	public void sleep() throws InterruptedException {
+		Thread.sleep(3000);
+	}
+}
+
+package com.intelli.automation.page;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+
+import com.intelli.automation.base.PageCore;
+
+public class input_page extends PageCore{
+	private final String base_url = "https://the-internet.herokuapp.com/inputs";
+	
+	
+	@FindBy(tagName = "h3")
+	private WebElement head;
+	
+	
+	@FindBy(tagName = "P")
+	private WebElement content;
+	
+	
+	public input_page(WebDriver driver) {
+		super(driver);
+		loadingElemets();
+	}
+	
+	
+	public void Navigate_page() {
+		driver.get(base_url);
+		
+	}
+	
+	
+	public String Locate_page_heading() {
+		return head.getText();
+	}
+	
+	
+	public String paragraph_text() {
+		return content.getText();
+	}
+	
+	
+	
+	
+	public boolean isTextPresent() {
+		return content.isDisplayed();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}
+package com.intelli.automation.test;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.intelli.automation.page.input_page;
+import com.intelli.automation.base.DriverSetup;
+
+public class verify_test extends DriverSetup{
+	
+	  @Test
+	  public void textOnScreen() {
+		  input_page p = new input_page(driver);
+		  
+		  p.Navigate_page();
+		  
+		  String head_text = p.Locate_page_heading();
+		  System.out.println(head_text);
+		  
+		  Assert.assertTrue(head_text.contains("Inputs") , "Header not included");
+		  
+		  
+		  
+		  Assert.assertTrue(p.isTextPresent());
+		 String text_para = p.paragraph_text();
+		 Assert.assertFalse(text_para.isEmpty() , "Paragraph is empty");
+				  
+	  }
+}
